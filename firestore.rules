@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidQuestion(data) {
+      return data.tahun is string && data.tahun.size() > 0 &&
+             data.negeri is string && data.negeri.size() > 0 &&
+             data.kertas is string && data.kertas.size() > 0 &&
+             data.pautan is string && data.pautan.size() > 0;
+    }
+
+    function isValidSubmission(data) {
+      return data.questionId is string &&
+             data.nama is string && data.nama.size() > 0 && data.nama.size() < 100 &&
+             data.maktab is string && data.maktab.size() > 0 && data.maktab.size() < 50 &&
+             data.kelas is string && data.kelas.size() > 0 && data.kelas.size() < 50 &&
+             data.jawapan is string && data.jawapan.size() > 0 && data.jawapan.size() < 10000 &&
+             data.status in ['Dihantar', 'Disemak'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /artifacts/{appId}/public/data/questions/{questionId} {
+      allow read: if isAuthenticated();
+      // In a real app, only admins could create questions. 
+      // For this prototype, we allow authenticated users to create if valid.
+      allow create: if isAuthenticated() && isValidQuestion(request.resource.data);
+    }
+
+    match /artifacts/{appId}/public/data/submissions/{submissionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSubmission(request.resource.data);
+      // Allow update for grading
+      allow update: if isAuthenticated() && 
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'bintang', 'komen', 'disemakPada']));
+    }
+  }
+}

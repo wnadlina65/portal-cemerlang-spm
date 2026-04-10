@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "Question": {
+      "title": "Question",
+      "description": "A study question or exam paper.",
+      "type": "object",
+      "properties": {
+        "tahun": { "type": "string", "description": "Year of the question." },
+        "negeri": { "type": "string", "description": "State or source of the question." },
+        "kertas": { "type": "string", "description": "Type of paper (e.g., Kertas 1)." },
+        "pautan": { "type": "string", "description": "Google Drive link to the PDF." },
+        "timestamp": { "type": "object", "description": "Server timestamp of creation." }
+      },
+      "required": ["tahun", "negeri", "kertas", "pautan"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "A student's answer submission.",
+      "type": "object",
+      "properties": {
+        "questionId": { "type": "string", "description": "ID of the question." },
+        "soalanInfo": { "type": "string", "description": "Summary info of the question." },
+        "nama": { "type": "string", "description": "Student's name." },
+        "maktab": { "type": "string", "description": "Student's ID or college number." },
+        "kelas": { "type": "string", "description": "Student's class." },
+        "bahagian": { "type": "string", "description": "Section of the paper." },
+        "jawapan": { "type": "string", "description": "Student's answer text." },
+        "status": { "type": "string", "enum": ["Dihantar", "Disemak"], "description": "Current status of the submission." },
+        "bintang": { "type": "string", "description": "Star rating (1-6)." },
+        "komen": {
+          "type": "object",
+          "properties": {
+            "kekuatan": { "type": "string" },
+            "kelemahan": { "type": "string" },
+            "intervensi": { "type": "string" }
+          }
+        },
+        "timestamp": { "type": "object", "description": "Server timestamp of submission." },
+        "disemakPada": { "type": "object", "description": "Server timestamp of grading." }
+      },
+      "required": ["questionId", "nama", "maktab", "kelas", "jawapan", "status"]
+    }
+  },
+  "firestore": {
+    "/artifacts/{appId}/public/data/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Collection of exam questions."
+    },
+    "/artifacts/{appId}/public/data/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Collection of student submissions."
+    }
+  }
+}
